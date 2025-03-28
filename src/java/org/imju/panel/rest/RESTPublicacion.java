@@ -16,68 +16,65 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
-import org.imju.panel.controllers.ConvocatoriaControlador;
-import org.imju.panel.models.Convocatoria;
-import org.imju.panel.models.ConvocatoriaCompleta;
-import org.imju.panel.models.Convocatoria_Modulo;
-import org.imju.panel.models.ConvocatoriaRequest;
+import org.imju.panel.controllers.PublicacionControlador;
+import org.imju.panel.models.Publicacion;
+import org.imju.panel.models.PublicacionConsulta;
+import org.imju.panel.models.PublicacionRequest;
+import org.imju.panel.models.Publicaciones_Modulo;
 
 /**
  *
  * @author IMJULEON
  */
-@Path("/convocatoria")
-public class RESTConvocatoria {
-
+@Path("/publicacion")
+public class RESTPublicacion {
+    
     @GET
-    @Path("getAllConvocatoria/{id_usuario}")
+    @Path("getAllPublicacion/{id_usuario}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllConvocatoria(@PathParam("id_usuario") int id_usuario) {
         String out = null;
-        List<Convocatoria_Modulo> convocatoria = null;
-        ConvocatoriaControlador ctrls = new ConvocatoriaControlador();
+        List<Publicaciones_Modulo> publicaciones = null;
+        PublicacionControlador ctrls = new PublicacionControlador();
         try {
-            convocatoria = ctrls.getAll(id_usuario);
-            out = new Gson().toJson(convocatoria);
+            publicaciones = ctrls.getAll(id_usuario);
+            out = new Gson().toJson(publicaciones);
         } catch (Exception e) {
             out = "{\"error\": \"Error\", \"message\": \"" + e.getMessage() + "\"}";
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
-
+    
     @GET
     @Path("show/{id_usuario}/{id_convocatoria}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response show(@PathParam("id_usuario") int id_usuario, 
-                         @PathParam("id_convocatoria") int id_convocatoria) {
+                         @PathParam("id_convocatoria") int id_publicacion) {
         String out = null;
-        List<ConvocatoriaCompleta> convocatoria = null;
-        ConvocatoriaControlador ctrls = new ConvocatoriaControlador();
+        List<PublicacionConsulta> publicacion = null;
+        PublicacionControlador ctrls = new PublicacionControlador();
 
         try {
-            convocatoria = ctrls.show(id_usuario, id_convocatoria);
-            out = new Gson().toJson(convocatoria);
+            publicacion = ctrls.show(id_usuario, id_publicacion);
+            out = new Gson().toJson(publicacion);
         } catch (Exception e) {
             out = "{\"error\": \"Error\", \"message\": \"" + e.getMessage() + "\"}";
         }
 
         return Response.status(Response.Status.OK).entity(out).build();
     }
-    
     @POST
     @Path("insert")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response insert(String datosRequest) {
         Gson gson = new Gson();
-        ConvocatoriaControlador ctrls = new ConvocatoriaControlador();
-        ConvocatoriaRequest request = gson.fromJson(datosRequest, ConvocatoriaRequest.class);
-        Convocatoria convocatoria = new Convocatoria();
+        PublicacionControlador ctrls = new PublicacionControlador();
+        PublicacionRequest request = gson.fromJson(datosRequest, PublicacionRequest.class);
+        Publicacion publicacion = new Publicacion();
         try {
-            int idConvocatoriaGenerado = ctrls.insert(request.getId_usuario(), 
-                                                      request.getConvocatoria_Modulo(), 
-                                                      request.getDetalle_Galeria());
-            convocatoria.setId_convocatoria(idConvocatoriaGenerado);
+            int idPublicacionGenerado = ctrls.insert(request);
+            publicacion.setId_publicacion(idPublicacionGenerado);
             return Response.status(Response.Status.OK).entity(gson.toJson(request)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(e.getMessage())).build();
@@ -90,13 +87,10 @@ public class RESTConvocatoria {
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(String datosRequest) {
         Gson gson = new Gson();
-        ConvocatoriaControlador ctrls = new ConvocatoriaControlador();
-        ConvocatoriaRequest request = gson.fromJson(datosRequest, ConvocatoriaRequest.class);
-        //Convocatoria convocatoria = new Convocatoria();
+        PublicacionControlador ctrls = new PublicacionControlador();
+        PublicacionRequest request = gson.fromJson(datosRequest, PublicacionRequest.class);
         try {
-            ctrls.update(request.getId_usuario(), 
-                         request.getConvocatoria_Modulo(), 
-                         request.getDetalle_Galeria());
+            ctrls.update(request);
             return Response.status(Response.Status.OK).entity(gson.toJson(request)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(e.getMessage())).build();
@@ -104,15 +98,15 @@ public class RESTConvocatoria {
     }
     
     @DELETE
-    @Path("delete/{id_usuario}/{id_convocatoria}")
+    @Path("delete/{id_usuario}/{id_publicacion}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@PathParam("id_usuario") int id_usuario, 
-                           @PathParam("id_convocatoria") int id_convocatoria) {
-        ConvocatoriaControlador ctrls = new ConvocatoriaControlador();
+                           @PathParam("id_publicacion") int id_publicacion) {
+        PublicacionControlador ctrls = new PublicacionControlador();
         try {
-            boolean resultado = ctrls.delete(id_usuario, id_convocatoria);
+            boolean resultado = ctrls.delete(id_usuario, id_publicacion);
             if (resultado) {
-                return Response.status(Response.Status.OK).entity("{\"mensaje\": \"Convocatoria eliminada correctamente\"}").build();
+                return Response.status(Response.Status.OK).entity("{\"mensaje\": \"Publicación eliminada correctamente\"}").build();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"mensaje\": \"No se pudo eliminar la galería\"}").build();
             }
@@ -120,4 +114,5 @@ public class RESTConvocatoria {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
+    
 }

@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import org.imju.panel.controllers.AccesoControlador;
+import org.imju.panel.models.Permisos;
 import org.imju.panel.models.Rol;
 import org.imju.panel.models.Usuario;
 
@@ -82,5 +83,21 @@ public class RESTAcceso {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(e.getMessage())).build();
         }
+    }
+    
+    @GET
+    @Path("showOutPermit/{id_rol}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response showOutPermit(@PathParam("id_rol") int id_rol) {
+        String out = null;
+        List<Permisos> permisos = null;
+        AccesoControlador ctrls = new AccesoControlador();
+        try {
+            permisos = ctrls.showOutPermit(id_rol);
+            out = new Gson().toJson(permisos);
+        } catch (Exception e) {
+            out = "{\"error\": \"Error\", \"message\": \"" + e.getMessage() + "\"}";
+        }
+        return Response.status(Response.Status.OK).entity(out).build();
     }
 }

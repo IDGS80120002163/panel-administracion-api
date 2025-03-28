@@ -16,48 +16,45 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
-import org.imju.panel.controllers.GaleriaControlador;
-import org.imju.panel.models.Galeria;
-import org.imju.panel.models.GaleriaImagenes;
-import org.imju.panel.models.GaleriaModulo;
-import org.imju.panel.models.GaleriaRequest;
+import org.imju.panel.controllers.DireccionesControlador;
+import org.imju.panel.models.Direccion;
+import org.imju.panel.models.Direcciones_Modulo;
+import org.imju.panel.models.DireccionCompleta;
+import org.imju.panel.models.DireccionRequest;
 
 /**
  *
  * @author IMJULEON
  */
-@Path("/galeria")
-public class RESTGaleria {
+@Path("/direccion")
+public class RESTDireccion {
     
     @GET
-    @Path("getAllGaleria/{id_usuario}")
+    @Path("getAllDireccion/{id_usuario}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllRol(@PathParam("id_usuario") int id_usuario) {
+    public Response getAllDireccion(@PathParam("id_usuario") int id_usuario) {
         String out = null;
-        List<GaleriaModulo> galeria = null;
-        GaleriaControlador ctrls = new GaleriaControlador();
+        List<Direcciones_Modulo> publicaciones = null;
+        DireccionesControlador ctrls = new DireccionesControlador();
         try {
-            galeria = ctrls.getAll(id_usuario);
-            out = new Gson().toJson(galeria);
+            publicaciones = ctrls.getAll(id_usuario);
+            out = new Gson().toJson(publicaciones);
         } catch (Exception e) {
-            out = """
-                  {"error" : "Error"}
-                  """ + e;
+            out = "{\"error\": \"Error\", \"message\": \"" + e.getMessage() + "\"}";
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
     
     @GET
-    @Path("show/{id_usuario}/{id_galeria}")
+    @Path("show/{id_usuario}/{id_direccion}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response show(@PathParam("id_usuario") int id_usuario,
-                         @PathParam("id_galeria") int id_galeria) {
+    public Response show(@PathParam("id_usuario") int id_usuario, 
+                         @PathParam("id_direccion") int id_direccion) {
         String out = null;
-        List<GaleriaImagenes> galeria = null;
-        GaleriaControlador ctrls = new GaleriaControlador();
+        DireccionesControlador ctrls = new DireccionesControlador();
         try {
-            galeria = ctrls.show(id_usuario, id_galeria);
-            out = new Gson().toJson(galeria);
+            DireccionCompleta direccionCompleta = ctrls.show(id_usuario, id_direccion);
+            out = new Gson().toJson(direccionCompleta);
         } catch (Exception e) {
             out = """
                   {"error" : "Error"}
@@ -72,12 +69,12 @@ public class RESTGaleria {
     @Produces(MediaType.APPLICATION_JSON)
     public Response insert(String datosRequest) {
         Gson gson = new Gson();
-        GaleriaControlador ctrls = new GaleriaControlador();
-        GaleriaRequest request = gson.fromJson(datosRequest, GaleriaRequest.class);
-        Galeria galeria = new Galeria();
+        DireccionesControlador ctrls = new DireccionesControlador();
+        DireccionRequest request = gson.fromJson(datosRequest, DireccionRequest.class);
+        Direccion direccion = new Direccion();
         try {
-            int idGaleriaGenerado = ctrls.insert(request.getIdUsuario(), request.getDetalle_Galeria());
-            galeria.setId_galeria(idGaleriaGenerado);
+            int idDireccionGenarada = ctrls.insert(request);
+            direccion.setId_direccion(idDireccionGenarada);
             return Response.status(Response.Status.OK).entity(gson.toJson(request)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(e.getMessage())).build();
@@ -86,14 +83,14 @@ public class RESTGaleria {
     
     @PUT
     @Path("update")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response update(String datosRequest) {
         Gson gson = new Gson();
-        GaleriaControlador ctrls = new GaleriaControlador();
-        GaleriaRequest request = gson.fromJson(datosRequest, GaleriaRequest.class);
+        DireccionesControlador ctrls = new DireccionesControlador();
+        DireccionRequest request = gson.fromJson(datosRequest, DireccionRequest.class);
         try {
-            ctrls.update(request.getGaleria(), request.getIdUsuario(), request.getDetalle_Galeria());
+            ctrls.update(request);
             return Response.status(Response.Status.OK).entity(gson.toJson(request)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(e.getMessage())).build();
@@ -101,17 +98,17 @@ public class RESTGaleria {
     }
     
     @DELETE
-    @Path("delete/{id_usuario}/{id_galeria}")
+    @Path("delete/{id_usuario}/{id_direccion}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@PathParam("id_usuario") int id_usuario, 
-                           @PathParam("id_galeria") int id_galeria) {
-        GaleriaControlador ctrls = new GaleriaControlador();
+                           @PathParam("id_direccion") int id_direccion) {
+        DireccionesControlador ctrls = new DireccionesControlador();
         try {
-            boolean resultado = ctrls.delete(id_usuario, id_galeria);
+            boolean resultado = ctrls.delete(id_usuario, id_direccion);
             if (resultado) {
-                return Response.status(Response.Status.OK).entity("{\"mensaje\": \"Galería eliminada correctamente\"}").build();
+                return Response.status(Response.Status.OK).entity("{\"mensaje\": \"Dirección eliminada correctamente\"}").build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"mensaje\": \"No se pudo eliminar la galería\"}").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"mensaje\": \"No se pudo eliminar la dirección\"}").build();
             }
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
